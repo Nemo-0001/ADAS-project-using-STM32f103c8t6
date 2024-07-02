@@ -17,7 +17,7 @@ const HCSR04_CfgType HCSR04_CfgParam[HCSR04_UNITS] =
 		GPIO_PIN_11,
 		TIM4,
 		TIM_CHANNEL_1, //Echo pin1 -->> B6
-		8
+		72
 	},
 	// HC-SR04 Sensor Unit 2 Configurations
 	{
@@ -25,7 +25,7 @@ const HCSR04_CfgType HCSR04_CfgParam[HCSR04_UNITS] =
 		GPIO_PIN_12,
 		TIM4,
 		TIM_CHANNEL_2, //Echo pin2 -->> B7
-		8
+		72
 	},
 	// HC-SR04 Sensor Unit 3 Configurations
     {
@@ -33,6 +33,14 @@ const HCSR04_CfgType HCSR04_CfgParam[HCSR04_UNITS] =
 		GPIO_PIN_10,
 		TIM3,
 		TIM_CHANNEL_1, //Echo pin3 -->> A6
-		8
+		72
+	},
+	// HC-SR04 Sensor Unit 4 Configurations
+	{
+		GPIOB,         //Trigger pin4 -->> B12
+		GPIO_PIN_12,
+		TIM3,
+		TIM_CHANNEL_2, //Echo pin3 -->> A7
+		72
 	}
 };

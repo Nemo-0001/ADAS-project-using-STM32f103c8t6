@@ -1,3 +1,4 @@
+"./Core/Src/Buzzer.o"
 "./Core/Src/DC_MOTOR.o"
 "./Core/Src/DC_MOTOR_cfg.o"
 "./Core/Src/HCSR04.o"

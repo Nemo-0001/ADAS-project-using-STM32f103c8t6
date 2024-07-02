@@ -38,6 +38,7 @@ extern "C" {
 #include "string.h"
 #include "DC_MOTOR.h"
 #include "HCSR04.h"
+#include "Buzzer.h"
 //#include "LCD.h"
 #include "tim.h"
 #include "usart.h"
@@ -70,7 +71,13 @@ void move_backward(void);
 void move_right(void);
 void move_left(void);
 void stop(void);
-void convert_float_to_string(float value, const uint8_t *str, uint8_t array_size);
+void UART_Receiving_Init(void);
+void ObdtacleAvoidance_Logic(float Front_Distance, float Right_Distance, float Left_Distance);
+void SafeDistance_Logic(float Safe_Distance);
+void BlindSpot_Logic(float Right_Distance, float Left_Distance);
+void UART_SendString(char *string);
+void UART_SendFloat(float num);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -80,22 +87,26 @@ void convert_float_to_string(float value, const uint8_t *str, uint8_t array_size
 #define L298_ENB_GPIO_Port GPIOA
 #define Echo3_Pin GPIO_PIN_6
 #define Echo3_GPIO_Port GPIOA
+#define Echo4_Pin GPIO_PIN_7
+#define Echo4_GPIO_Port GPIOA
 #define L298_IN1_Pin GPIO_PIN_0
 #define L298_IN1_GPIO_Port GPIOB
 #define L298_IN2_Pin GPIO_PIN_1
 #define L298_IN2_GPIO_Port GPIOB
 #define Trigger3_Pin GPIO_PIN_10
 #define Trigger3_GPIO_Port GPIOB
-#define LED_Pin GPIO_PIN_12
-#define LED_GPIO_Port GPIOB
+#define Trigger4_Pin GPIO_PIN_12
+#define Trigger4_GPIO_Port GPIOB
+#define Buzzer_Pin GPIO_PIN_13
+#define Buzzer_GPIO_Port GPIOB
 #define Trigger1_Pin GPIO_PIN_11
 #define Trigger1_GPIO_Port GPIOA
 #define Trigger2_Pin GPIO_PIN_12
 #define Trigger2_GPIO_Port GPIOA
 #define L298_IN3_Pin GPIO_PIN_4
 #define L298_IN3_GPIO_Port GPIOB
-#define L298_IN5_Pin GPIO_PIN_5
-#define L298_IN5_GPIO_Port GPIOB
+#define L298_IN4_Pin GPIO_PIN_5
+#define L298_IN4_GPIO_Port GPIOB
 #define Echo1_Pin GPIO_PIN_6
 #define Echo1_GPIO_Port GPIOB
 #define Echo2_Pin GPIO_PIN_7
