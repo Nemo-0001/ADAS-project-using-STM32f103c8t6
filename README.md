@@ -1,7 +1,7 @@
 # ADAS-project-using-STM32f103c8t6
 This is my graduation project based on AI & Embedded systems.
 
-Here's an example of a `README.md` file for your project:
+Here's a brief of most important features and peripherals used.
 
 ---
 
