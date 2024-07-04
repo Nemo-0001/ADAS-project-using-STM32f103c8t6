@@ -76,8 +76,9 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     /**TIM4 GPIO Configuration
     PB6     ------> TIM4_CH1
     PB7     ------> TIM4_CH2
+    PB8     ------> TIM4_CH3
     */
-    GPIO_InitStruct.Pin = Echo1_Pin|Echo2_Pin;
+    GPIO_InitStruct.Pin = Echo1_Pin|Echo2_Pin|Echo5_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -162,8 +163,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
     /**TIM4 GPIO Configuration
     PB6     ------> TIM4_CH1
     PB7     ------> TIM4_CH2
+    PB8     ------> TIM4_CH3
     */
-    HAL_GPIO_DeInit(GPIOB, Echo1_Pin|Echo2_Pin);
+    HAL_GPIO_DeInit(GPIOB, Echo1_Pin|Echo2_Pin|Echo5_Pin);
 
     /* TIM4 interrupt Deinit */
     HAL_NVIC_DisableIRQ(TIM4_IRQn);

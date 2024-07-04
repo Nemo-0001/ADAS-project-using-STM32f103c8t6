@@ -51,15 +51,15 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, L298_IN1_Pin|L298_IN2_Pin|Trigger3_Pin|Trigger4_Pin
-                          |Buzzer_Pin|L298_IN3_Pin|L298_IN4_Pin, GPIO_PIN_RESET);
+                          |Buzzer_Pin|Trigger5_Pin|L298_IN3_Pin|L298_IN4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, Trigger1_Pin|Trigger2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin
-                           PBPin PBPin PBPin */
+                           PBPin PBPin PBPin PBPin */
   GPIO_InitStruct.Pin = L298_IN1_Pin|L298_IN2_Pin|Trigger3_Pin|Trigger4_Pin
-                          |Buzzer_Pin|L298_IN3_Pin|L298_IN4_Pin;
+                          |Buzzer_Pin|Trigger5_Pin|L298_IN3_Pin|L298_IN4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;

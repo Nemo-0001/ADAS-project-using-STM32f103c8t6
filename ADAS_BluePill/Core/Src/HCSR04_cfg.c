@@ -40,7 +40,15 @@ const HCSR04_CfgType HCSR04_CfgParam[HCSR04_UNITS] =
 		GPIOB,         //Trigger pin4 -->> B12
 		GPIO_PIN_12,
 		TIM3,
-		TIM_CHANNEL_2, //Echo pin3 -->> A7
+		TIM_CHANNEL_2, //Echo pin4 -->> A7
+		72
+	},
+	// HC-SR04 Sensor Unit 5 Configurations
+	{
+		GPIOB,         //Trigger pin5 -->> B14
+		GPIO_PIN_14,
+		TIM4,
+		TIM_CHANNEL_3, //Echo pin5 -->> B8
 		72
 	}
 };

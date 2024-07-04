@@ -99,6 +99,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 #define Trigger4_GPIO_Port GPIOB
 #define Buzzer_Pin GPIO_PIN_13
 #define Buzzer_GPIO_Port GPIOB
+#define Trigger5_Pin GPIO_PIN_14
+#define Trigger5_GPIO_Port GPIOB
 #define Trigger1_Pin GPIO_PIN_11
 #define Trigger1_GPIO_Port GPIOA
 #define Trigger2_Pin GPIO_PIN_12
@@ -111,6 +113,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 #define Echo1_GPIO_Port GPIOB
 #define Echo2_Pin GPIO_PIN_7
 #define Echo2_GPIO_Port GPIOB
+#define Echo5_Pin GPIO_PIN_8
+#define Echo5_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
