@@ -5,4 +5,4 @@ This is the STM32f103c8t6 HAL drivers, ECUAL drivers(Motor & Ultrasonic), and ma
 I have used timer3 & timer4 to handle the ultrasonic sensors, and I have used input capture direct mode with interrupts for this purpose.
 I have used timer2 to handle the DC motors, and I have used PWM generation mode for this purpose.
 
-[![Watch the video of the simulation on yotube](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)]([https://youtu.be/VIDEO_ID](https://youtu.be/wQjUKuoTerA?si=SQomSVhpP3Q2sc1S))
+[![Watch the video of the simulation on yotube](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://youtu.be/wQjUKuoTerA?si=SQomSVhpP3Q2sc1S)
