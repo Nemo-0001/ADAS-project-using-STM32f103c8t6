@@ -127,7 +127,10 @@ Handles UART receive complete interrupts and processes incoming commands.
 
 1. Clone the repository to your local machine.
 2. Open the project in your preferred IDE (e.g., STM32CubeIDE).
-3. Connect the necessary peripherals as described above.
+3. Connect the necessary peripherals as described in the Pinout_CubeMX.JPG down below.
+
+![CubeMX_Pinout](Simulation/Pinout_CubeMX.JPG)
+
 4. Build and flash the project to your STM32 microcontroller.
 5. Use a UART terminal to send commands to the car:
    - 'F': Move forward
@@ -137,7 +140,7 @@ Handles UART receive complete interrupts and processes incoming commands.
    - 'S': Stop
    - 'O': Enable obstacle avoidance
    - 'D': Enable blind spot safe distance monitoring.
-6. Try the code on the simulation in Simulation directory
+7. Try the code on the simulation in Simulation directory
 
 ## Simulation
 
@@ -147,7 +150,7 @@ You can see here the simulation and if you pressed the img you can find the vide
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MITT License.
 
 
 
