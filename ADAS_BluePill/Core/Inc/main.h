@@ -36,9 +36,11 @@ extern "C" {
 #include <stdbool.h>
 #include <math.h>
 #include "string.h"
+#include <stdarg.h>
 #include "DC_MOTOR.h"
 #include "HCSR04.h"
 #include "Buzzer.h"
+#include "LED.h"
 //#include "LCD.h"
 #include "tim.h"
 #include "usart.h"
@@ -66,15 +68,25 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void SysTick_CallBack(void);
+
+/******************(Movement control)*********************/
 void move_forward(void);
 void move_backward(void);
 void move_right(void);
 void move_left(void);
 void stop(void);
-void UART_Receiving_Init(void);
+void Speed_Control(uint16_t Speed);
+float Calculate_Speed(float current_distance, uint32_t current_time);
+
+/***********************(Features)*************************/
 void ObdtacleAvoidance_Logic(float Front_Distance, float Right_Distance, float Left_Distance);
 void SafeDistance_Logic(float Safe_Distance);
-void BlindSpot_Logic(float Right_Distance, float Left_Distance);
+void BlindSpot_Logic(float BlindSpot_Right, float BlindSpot_Left);
+void Alarm_Subsystem(uint8_t alarmLevel);
+void Adaptive_Cruise_Control(float Distance);
+
+/**********************(Communication)*************************/
+void UART_Receiving_Init(void);
 void UART_SendString(char *string);
 void UART_SendFloat(float num);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
@@ -101,10 +113,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 #define Buzzer_GPIO_Port GPIOB
 #define Trigger5_Pin GPIO_PIN_14
 #define Trigger5_GPIO_Port GPIOB
+#define LED_RED_Pin GPIO_PIN_15
+#define LED_RED_GPIO_Port GPIOB
 #define Trigger1_Pin GPIO_PIN_11
 #define Trigger1_GPIO_Port GPIOA
 #define Trigger2_Pin GPIO_PIN_12
 #define Trigger2_GPIO_Port GPIOA
+#define LED_YELLOW_Pin GPIO_PIN_15
+#define LED_YELLOW_GPIO_Port GPIOA
 #define L298_IN3_Pin GPIO_PIN_4
 #define L298_IN3_GPIO_Port GPIOB
 #define L298_IN4_Pin GPIO_PIN_5
@@ -115,6 +131,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 #define Echo2_GPIO_Port GPIOB
 #define Echo5_Pin GPIO_PIN_8
 #define Echo5_GPIO_Port GPIOB
+#define LED_GREEN_Pin GPIO_PIN_9
+#define LED_GREEN_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
