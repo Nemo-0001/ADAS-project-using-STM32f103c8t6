@@ -1,0 +1,5 @@
+../ECUAL/Src/HCSR04.c:32:6:HCSR04_Init	88	static
+../ECUAL/Src/HCSR04.c:122:6:HCSR04_TMR_OVF_ISR	24	static
+../ECUAL/Src/HCSR04.c:135:6:HCSR04_TMR_IC_ISR	32	static
+../ECUAL/Src/HCSR04.c:169:7:HCSR04_Read	16	static
+../ECUAL/Src/HCSR04.c:178:6:HCSR04_Trigger	24	static

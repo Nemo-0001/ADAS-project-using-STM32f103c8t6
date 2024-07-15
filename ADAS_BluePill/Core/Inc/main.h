@@ -36,15 +36,16 @@ extern "C" {
 #include <stdbool.h>
 #include <math.h>
 #include "string.h"
-#include <stdarg.h>
-#include "DC_MOTOR.h"
-#include "HCSR04.h"
-#include "Buzzer.h"
-#include "LED.h"
-//#include "LCD.h"
+
+#include "../../ECUAL/Inc/DC_MOTOR.h"
+#include "../../ECUAL/Inc/HCSR04.h"
+#include "../../ECUAL/Inc/Buzzer.h"
+#include "../../ECUAL/Inc/LED.h"
+
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+
 #include "../../util/util.h"
 /* USER CODE END Includes */
 
@@ -70,20 +71,20 @@ void Error_Handler(void);
 void SysTick_CallBack(void);
 
 /******************(Movement control)*********************/
-void move_forward(void);
-void move_backward(void);
-void move_right(void);
-void move_left(void);
+void move_forward(uint16_t SpeedF);
+void move_backward(uint16_t SpeedB);
+void move_right(uint16_t SpeedR);
+void move_left(uint16_t SpeedL);
 void stop(void);
-void Speed_Control(uint16_t Speed);
+void Speed_Control(uint16_t Speed1, uint16_t Speed2);
 float Calculate_Speed(float current_distance, uint32_t current_time);
 
 /***********************(Features)*************************/
-void ObdtacleAvoidance_Logic(float Front_Distance, float Right_Distance, float Left_Distance);
-void SafeDistance_Logic(float Safe_Distance);
-void BlindSpot_Logic(float BlindSpot_Right, float BlindSpot_Left);
+void Obdtacle_Avoidance(float Front_Distance, float Right_Distance, float Left_Distance);
+void Adaptive_Cruise_Control(float Safe_Distance);
+void BlindSpot_Detection(float BlindSpot_Right, float BlindSpot_Left);
 void Alarm_Subsystem(uint8_t alarmLevel);
-void Adaptive_Cruise_Control(float Distance);
+//void Adaptive_Cruise_Control(float Distance);
 
 /**********************(Communication)*************************/
 void UART_Receiving_Init(void);

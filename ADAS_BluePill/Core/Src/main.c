@@ -48,6 +48,7 @@ TIM_HandleTypeDef htim4;
 
 #define THRESHOLD_DISTANCE   20.0  //in centimeters
 #define SAFE_DISTANCE        30.0
+#define ADAPTIVE_DISTANCE    40.0
 
 #define ALARM_OFF            0
 #define ALARM_LOW_LEVEL      1
@@ -56,6 +57,10 @@ TIM_HandleTypeDef htim4;
 
 //Range of the speed is from : [0 ->> 65,535] | [0 ->> 0XFFFF]
 #define MIN_SPEED            0
+#define LOW_SPEED            0XFA
+#define SPEED_1              0X1FF
+#define SPEED_2              0XAFF
+#define SPEED_3              0X1111
 #define MAX_SPEED            0XFFFF
 
 /* Macros for selecting the mode & the features of the car */
@@ -65,7 +70,14 @@ TIM_HandleTypeDef htim4;
 #define LEFT                        'L'
 #define STOP                        'S'
 #define OBSTACLE_AVOIDANCE          'O'
-#define BLIND_SPOT_SAFE_DISTANCE    'D'
+#define BLIND_SPOT_ADAPTIVE_CRUISE  'D'
+
+//Speed levels
+#define SPEED_LOW                   'Q'
+#define SPEED1                      'W'
+#define SPEED2            		    'X'
+#define SPEED3                	    'Y'
+#define SPEED_HIGH                  'U'
 
 typedef enum {
 	Forward = 0,
@@ -74,7 +86,7 @@ typedef enum {
 	Left,
 	Stop,
 	Obstacle_Avoidance,
-	BlindSpot_SafeDistance
+	BlindSpot_AdaptiveCruise
 } state;
 
 state current_state = Stop;
@@ -96,8 +108,8 @@ uint8_t RX_Data = 0;
 uint32_t Current_Time = 0;
 float Speed = 0.0;
 
-//volatile uint8_t stopped_sent = 0;
-//volatile uint8_t new_data_flag = 0;
+uint16_t current_speed = 0;
+//uint16_t current_speed2 = 0;
 
 /* USER CODE END PV */
 
@@ -152,7 +164,7 @@ int main(void)
   /*Local variables end*/
 
   UART_SendString("UART is ready for sending & receiving...\r\n");
-  HAL_Delay(100);
+  HAL_Delay(50);
 
 
   /* USER CODE END 2 */
@@ -173,16 +185,30 @@ int main(void)
 				Alarm_Subsystem(ALARM_HIGH_LEVEL);
 			}
 
-			UART_SendString("Moving forward\r\n");
-			move_forward();
-			HAL_Delay(300);
+			if (current_speed != 0) {
+				UART_SendString("Moving forward with speed: ");
+				UART_SendFloat(current_speed);
+				UART_SendString("\r\n");
+				move_forward(current_speed);
+				HAL_Delay(300);
+			} else {
+				UART_SendString("Your speed is minimum\r\n");
+				HAL_Delay(100);
+			}
 			current_state = Stop;
 			break;
 
 		case Backward:
-			UART_SendString("Moving backward\r\n");
-			move_backward();
-			HAL_Delay(300);
+			if (current_speed != 0) {
+				UART_SendString("Moving backward with speed: ");
+				UART_SendFloat(current_speed);
+				UART_SendString("\r\n");
+				move_backward(current_speed);
+				HAL_Delay(300);
+			} else {
+				UART_SendString("Your speed is minimum\r\n");
+				HAL_Delay(100);
+			}
 			current_state = Stop;
 			break;
 
@@ -197,7 +223,7 @@ int main(void)
 			}
 
 			UART_SendString("Moving right\r\n");
-			move_right();
+			move_right(MAX_SPEED);
 			HAL_Delay(300);
 			current_state = Stop;
 			break;
@@ -213,7 +239,7 @@ int main(void)
 			}
 
 			UART_SendString("Moving left\r\n");
-			move_left();
+			move_left(MAX_SPEED);
 			HAL_Delay(300);
 			current_state = Stop;
 			break;
@@ -228,32 +254,35 @@ int main(void)
 			Right_Distance = HCSR04_Read(HCSR04_SENSOR1);
 
 			Front_Distance = HCSR04_Read(HCSR04_SENSOR2);
-			UART_SendString("Distance: ");
+			UART_SendString("Front distance: ");
 			UART_SendFloat(Front_Distance);
 			UART_SendString("\r\n");
 
 			Left_Distance = HCSR04_Read(HCSR04_SENSOR3);
 
-			ObdtacleAvoidance_Logic(Front_Distance, Right_Distance, Left_Distance);
+			Obdtacle_Avoidance(Front_Distance, Right_Distance, Left_Distance);
 			HAL_Delay(50);
 
 			break;
 
-		case BlindSpot_SafeDistance:
+		case BlindSpot_AdaptiveCruise:
 			Front_Distance = HCSR04_Read(HCSR04_SENSOR2);
-			UART_SendString("Distance: ");
+			UART_SendString("Front distance: ");
 			UART_SendFloat(Front_Distance);
 			UART_SendString("\r\n");
 
 			BlindSpot_Right = HCSR04_Read(HCSR04_SENSOR4);
 			BlindSpot_Left = HCSR04_Read(HCSR04_SENSOR5);
 
-			SafeDistance_Logic(Front_Distance);
+			Adaptive_Cruise_Control(Front_Distance);
 			HAL_Delay(50);
 
-			BlindSpot_Logic(BlindSpot_Right, BlindSpot_Left);
+			BlindSpot_Detection(BlindSpot_Right, BlindSpot_Left);
 			HAL_Delay(50);
 
+			break;
+
+			current_state = Stop;
 			break;
 
 		default:
@@ -357,27 +386,27 @@ void SysTick_CallBack(void)
 
 
 /*------------------------- (Movement control start) ---------------------------------*/
-void move_forward(void){
-	DC_MOTOR_Start(DC_MOTOR1, DIR_CCW, MAX_SPEED);
-	DC_MOTOR_Start(DC_MOTOR2, DIR_CW, MAX_SPEED);
+void move_forward(uint16_t SpeedF){
+	DC_MOTOR_Start(DC_MOTOR1, DIR_CCW, SpeedF);
+	DC_MOTOR_Start(DC_MOTOR2, DIR_CCW, SpeedF);
 }
 
 
-void move_backward(void){
-	DC_MOTOR_Start(DC_MOTOR1, DIR_CW, MAX_SPEED);
-	DC_MOTOR_Start(DC_MOTOR2, DIR_CCW, MAX_SPEED);
+void move_backward(uint16_t SpeedB){
+	DC_MOTOR_Start(DC_MOTOR1, DIR_CW, SpeedB);
+	DC_MOTOR_Start(DC_MOTOR2, DIR_CW, SpeedB);
 }
 
 
-void move_right(void){
-	DC_MOTOR_Start(DC_MOTOR1, DIR_CCW, MAX_SPEED);
-	DC_MOTOR_Start(DC_MOTOR2, DIR_CCW, MAX_SPEED);
+void move_right(uint16_t SpeedR){
+	DC_MOTOR_Start(DC_MOTOR1, DIR_CCW, SpeedR);
+	DC_MOTOR_Start(DC_MOTOR2, DIR_CCW, MIN_SPEED);
 }
 
 
-void move_left(void){
-	DC_MOTOR_Start(DC_MOTOR1, DIR_CW, MAX_SPEED);
-	DC_MOTOR_Start(DC_MOTOR2, DIR_CW, MAX_SPEED);
+void move_left(uint16_t SpeedL){
+	DC_MOTOR_Start(DC_MOTOR1, DIR_CCW, MIN_SPEED);
+	DC_MOTOR_Start(DC_MOTOR2, DIR_CCW, SpeedL);
 }
 
 
@@ -386,9 +415,9 @@ void stop(void){
 	DC_MOTOR_Stop(DC_MOTOR2);
 }
 
-void Speed_Control(uint16_t Speed){
-	DC_MOTOR_Set_Speed(DC_MOTOR1, Speed);
-	DC_MOTOR_Set_Speed(DC_MOTOR2, Speed);
+void Speed_Control(uint16_t Speed1, uint16_t Speed2){
+	DC_MOTOR_Set_Speed(DC_MOTOR1, Speed1);
+	DC_MOTOR_Set_Speed(DC_MOTOR2, Speed2);
 }
 
 /*
@@ -413,86 +442,99 @@ float Calculate_Speed(float current_distance, uint32_t current_time){
     previous_distance = current_distance;
     previous_time = current_time;
 
-    return speed;
+    return (uint16_t)speed;
 }
 /*------------------------- (Movement control end) ---------------------------------*/
 
 
 
 /*------------------------- (Features part start) ---------------------------------*/
-void ObdtacleAvoidance_Logic(float Front_Distance, float Right_Distance, float Left_Distance){
+void Obdtacle_Avoidance(float Front_Distance, float Right_Distance, float Left_Distance){
 	// Perform obstacle avoidance logic
 	if (Right_Distance < THRESHOLD_DISTANCE || Front_Distance < THRESHOLD_DISTANCE || Left_Distance < THRESHOLD_DISTANCE) {
 		// Obstacle detected
 		// Choose appropriate avoidance maneuver
 		if (Right_Distance < Front_Distance && Right_Distance < Left_Distance) {
 			// Obstacle is closer to sensor 1
- 			//UART_SendString("Moving left\r\n");
-			move_left();
+ 			UART_SendString("Moving left\r\n");
+			move_left(current_speed);
 		} else if (Front_Distance < Right_Distance && Front_Distance < Left_Distance) {
 			// Obstacle is closer to sensor 2
-			//UART_SendString("Moving backward\r\n");
+			UART_SendString("Moving backward\r\n");
 			stop();
-			move_backward();
+			move_backward(current_speed);
 			HAL_Delay(50);
 
 			if (Right_Distance < Left_Distance) {
-				//UART_SendString("Moving left\r\n");
-				move_left();
+				UART_SendString("Moving left\r\n");
+				move_left(current_speed);
 				HAL_Delay(500);
-				move_forward();
+				move_forward(current_speed);
 			} else {
-				//UART_SendString("Moving right\r\n");
-				move_right();
+				UART_SendString("Moving right\r\n");
+				move_right(current_speed);
 				HAL_Delay(500);
-				move_forward();
+				move_forward(current_speed);
 			}
 		} else {
 			// Obstacle is closer to sensor 3
-			//UART_SendString("Moving right\r\n");
-			move_right();
+			UART_SendString("Moving right\r\n");
+			move_right(current_speed);
 		}
 	} else {
 		// No obstacle detected
 		Current_Time = HAL_GetTick(); // Get the current time in milliseconds
 		Speed = Calculate_Speed(Front_Distance, Current_Time);
-		move_forward();
+		move_forward(current_speed);
 
-		UART_SendString("Speed: ");
+		UART_SendString("Moving forward with speed: ");
 		UART_SendFloat(Speed);
 		UART_SendString("\r\n");
 	}
 }
 
-void SafeDistance_Logic(float Safe_Distance){
+void Adaptive_Cruise_Control(float Safe_Distance){
 	//For safe distance detection
-	if (Safe_Distance < SAFE_DISTANCE && Safe_Distance > THRESHOLD_DISTANCE) {
-		Adaptive_Cruise_Control(Safe_Distance);
-		//UART_SendString("Speed has been limited\r\n");
-	} else if (Safe_Distance < THRESHOLD_DISTANCE) {
+	if ((Safe_Distance < ADAPTIVE_DISTANCE) && (Safe_Distance > SAFE_DISTANCE)){
+		Speed_Control(0X7FF, 0X7FF);
+		UART_SendString("Speed has been limited to: ");
+		UART_SendFloat(0X7FF);
+		UART_SendString("\r\n");
+	} else if((Safe_Distance < SAFE_DISTANCE) && (Safe_Distance > THRESHOLD_DISTANCE)){
+		Speed_Control(0XFA, 0XFA);
+		UART_SendString("Speed has been limited to: ");
+		UART_SendFloat(0XFA);
+		UART_SendString("\r\n");
+	} else if (Safe_Distance < THRESHOLD_DISTANCE){
 		stop();
-		//UART_SendString("Stopped\r\n");
-	} else {
+		UART_SendString("Stopped\r\n");
+	} else{
 		Current_Time = HAL_GetTick(); // Get the current time in milliseconds
 		Speed = Calculate_Speed(Safe_Distance, Current_Time);
-		move_forward();
+		move_forward(current_speed);
 
-		UART_SendString("Speed: ");
+		UART_SendString("Moving forward with speed: ");
 		UART_SendFloat(Speed);
 		UART_SendString("\r\n");
 	}
 }
 
-void BlindSpot_Logic(float BlindSpot_Right, float BlindSpot_Left){
+void BlindSpot_Detection(float BlindSpot_Right, float BlindSpot_Left){
 	//For blind spot detection
-	if (((BlindSpot_Right > THRESHOLD_DISTANCE) && (BlindSpot_Right < SAFE_DISTANCE)) ||
-			((BlindSpot_Left > THRESHOLD_DISTANCE) && (BlindSpot_Left < SAFE_DISTANCE))){
+	if ((BlindSpot_Right > THRESHOLD_DISTANCE) && (BlindSpot_Right < SAFE_DISTANCE)){
 		Alarm_Subsystem(ALARM_MEDIUM_LEVEL);
-		UART_SendString("Be careful!! \r\n");
+		UART_SendString("Take care of your right!! \r\n");
 		UART_SendString("Your blind spot is not safe\r\n");
-	} else if ((BlindSpot_Right < THRESHOLD_DISTANCE) || (BlindSpot_Left < THRESHOLD_DISTANCE)){
+	} else if ((BlindSpot_Left > THRESHOLD_DISTANCE) && (BlindSpot_Left < SAFE_DISTANCE)){
+		Alarm_Subsystem(ALARM_MEDIUM_LEVEL);
+		UART_SendString("Take care of your left!! \r\n");
+		UART_SendString("Your blind spot is not safe\r\n");
+	} else if (BlindSpot_Right < THRESHOLD_DISTANCE){
 		Alarm_Subsystem(ALARM_HIGH_LEVEL);
-		UART_SendString("Danger!!!\r\n");
+		UART_SendString("Danger on your right!!!\r\n");
+	} else if (BlindSpot_Left < THRESHOLD_DISTANCE){
+		Alarm_Subsystem(ALARM_HIGH_LEVEL);
+		UART_SendString("Danger on your left!!!\r\n");
 	} else{
 		Alarm_Subsystem(ALARM_LOW_LEVEL);
 	}
@@ -521,18 +563,6 @@ void Alarm_Subsystem(uint8_t alarmLevel) {
 		LED_ON(RED_LED);
 	} else{
 		/* Nothing */
-	}
-}
-
-
-void Adaptive_Cruise_Control(float Distance){
-	uint16_t speed = MAX_SPEED;
-
-	for(uint16_t i = 30; i > 20; i--){
-		if (Distance < (float) i) {
-			speed = (MAX_SPEED / 10) * (i - 20);
-			Speed_Control(speed);
-		}
 	}
 }
 /*------------------------- (Features part end) ---------------------------------*/
@@ -598,14 +628,32 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 				current_state = Obstacle_Avoidance;
 				break;
 
-			case BLIND_SPOT_SAFE_DISTANCE:
-				current_state = BlindSpot_SafeDistance;
+			case BLIND_SPOT_ADAPTIVE_CRUISE:
+				current_state = BlindSpot_AdaptiveCruise;
+				break;
+
+			case SPEED_LOW:
+				current_speed = LOW_SPEED;
+				break;
+
+			case SPEED1:
+				current_speed = SPEED_1;
+				break;
+
+			case SPEED2:
+				current_speed = SPEED_2;
+				break;
+			case SPEED3:
+				current_speed = SPEED_3;
+				break;
+
+			case SPEED_HIGH:
+				current_speed = MAX_SPEED;
 				break;
 
 			default:
 				break;
 		}
-
     }
 }
 /*------------------------- (Communication part end) ---------------------------------*/
